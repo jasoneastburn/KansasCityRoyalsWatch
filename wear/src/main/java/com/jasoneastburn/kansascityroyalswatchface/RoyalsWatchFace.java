@@ -55,6 +55,8 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
      * Handler message id for updating the time periodically in interactive mode.
      */
     private static final int MSG_UPDATE_TIME = 0;
+    private static final float HAND_END_CAP_RADIUS = 4.0f;
+    private static final float SHOW_RADIUS = 6.0f;
 
     @Override
     public Engine onCreateEngine() {
@@ -87,6 +89,9 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         Paint mBackgroundPaint;
         Paint mHandPaint;
         Paint mHandPaintAmbient;
+        Paint mHourPaint;
+        Paint mMinutePaint;
+        Paint mSecondPaint;
         Paint mTickPaint;
         Bitmap mBackgroundBitmap;
         Bitmap mBackgroundBitmapAmbient;
@@ -135,6 +140,27 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             mHandPaint.setAntiAlias(true);
             mHandPaint.setStrokeCap(Paint.Cap.ROUND);
 
+            mHourPaint = new Paint();
+            mHourPaint.setColor(resources.getColor(R.color.analog_hands_ambient));
+            mHourPaint.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
+            mHourPaint.setAntiAlias(true);
+            mHourPaint.setStrokeCap(Paint.Cap.ROUND);
+            mHourPaint.setShadowLayer(HAND_END_CAP_RADIUS,0,0, R.color.black);
+            mHourPaint.setStyle(Paint.Style.STROKE);
+
+            mMinutePaint = new Paint();
+            mMinutePaint.setColor(resources.getColor(R.color.analog_hands_ambient));
+            mMinutePaint.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
+            mMinutePaint.setAntiAlias(true);
+            mMinutePaint.setStrokeCap(Paint.Cap.ROUND);
+            mMinutePaint.setShadowLayer(HAND_END_CAP_RADIUS,0,0, R.color.black);
+            mMinutePaint.setStyle(Paint.Style.STROKE);
+
+            mSecondPaint = new Paint();
+            mSecondPaint.setColor(resources.getColor(R.color.analog_hands));
+            mSecondPaint.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
+            mSecondPaint.setAntiAlias(true);
+
             mHandPaintAmbient = new Paint();
             mHandPaintAmbient.setColor(resources.getColor(R.color.analog_hands_ambient));
             mHandPaintAmbient.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
@@ -175,6 +201,9 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
                     mHandPaint.setAntiAlias(!inAmbientMode);
+                    mSecondPaint.setAntiAlias(!inAmbientMode);
+                    mMinutePaint.setAntiAlias(!inAmbientMode);
+                    mHourPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -211,7 +240,6 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
-
 
             // Find the center. Ignore the window insets so that, on round watches with a
             // "chin", the watch face is centered on the entire screen, not just the usable
@@ -261,7 +289,6 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
                         cy + y2, mTickPaint);
             }
 
-
             float secRot = mTime.second / 30f * (float) Math.PI;
             int minutes = mTime.minute;
             float minRot = minutes / 30f * (float) Math.PI;
@@ -271,19 +298,38 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             float minLength = centerX - 40;
             float hrLength = centerX - 80;
 
+            canvas.save();
+
             if (!mAmbient) {
                 float secX = (float) Math.sin(secRot) * secLength;
                 float secY = (float) -Math.cos(secRot) * secLength;
-                canvas.drawLine(centerX, centerY, centerX + secX, centerY + secY, mHandPaint);
+                canvas.drawLine(centerX, centerY, centerX + secX, centerY + secY, mSecondPaint);
             }
-
-            float minX = (float) Math.sin(minRot) * minLength;
-            float minY = (float) -Math.cos(minRot) * minLength;
-            canvas.drawLine(centerX, centerY, centerX + minX, centerY + minY, mHandPaintAmbient);
 
             float hrX = (float) Math.sin(hrRot) * hrLength;
             float hrY = (float) -Math.cos(hrRot) * hrLength;
-            canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHandPaintAmbient);
+
+
+            canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHourPaint);
+//            canvas.drawRoundRect(centerX - HAND_END_CAP_RADIUS,
+//                    centerY - hrLength, centerX + HAND_END_CAP_RADIUS,
+//                   centerY + HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS,
+//                    HAND_END_CAP_RADIUS, mHourPaint);
+
+            float minX = (float) Math.sin(minRot) * minLength;
+            float minY = (float) -Math.cos(minRot) * minLength;
+
+            canvas.drawLine(centerX, centerY, centerX + minX, centerY + minY, mMinutePaint);
+//            canvas.drawRoundRect(centerX - HAND_END_CAP_RADIUS,
+//                   centerY - minLength, centerX + HAND_END_CAP_RADIUS,
+//                    centerY + HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS,
+//                    HAND_END_CAP_RADIUS, mMinutePaint);
+
+            canvas.drawCircle(centerX, centerY, HAND_END_CAP_RADIUS,
+                    mHourPaint);
+
+
+
         }
 
         @Override
