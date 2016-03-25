@@ -87,6 +87,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         Paint mBackgroundPaint;
         Paint mHandPaint;
         Paint mHandPaintAmbient;
+        Paint mTickPaint;
         Bitmap mBackgroundBitmap;
         Bitmap mBackgroundBitmapAmbient;
         boolean mAmbient;
@@ -139,6 +140,12 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             mHandPaintAmbient.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
             mHandPaintAmbient.setAntiAlias(true);
             mHandPaintAmbient.setStrokeCap(Paint.Cap.ROUND);
+
+
+            mTickPaint = new Paint();
+            mTickPaint.setColor(resources.getColor(R.color.analog_hands_ambient));
+            mTickPaint.setStrokeWidth(2.f);
+            mTickPaint.setAntiAlias(true);
 
             mTime = new Time();
         }
@@ -229,6 +236,29 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             } else {
                // canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
                 canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
+            }
+
+            double sinVal = 0, cosVal = 0, angle = 0;
+            float length1 = 0, length2 = 0;
+            float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
+            // draw ticks
+            int w = bounds.width(), h = bounds.height();
+            float cx = w / 2.0f, cy = h / 2.0f;
+            length1 = cx - 25;
+            length2 = cx;
+            for (int i = 0; i < 60; i++) {
+                angle = (i * Math.PI * 2 / 60);
+                sinVal = Math.sin(angle);
+                cosVal = Math.cos(angle);
+                float len = (i % 5 == 0) ? length1 :
+                        (length1 + 15);
+                x1 = (float)(sinVal * len);
+                y1 = (float)(-cosVal * len);
+                x2 = (float)(sinVal * length2);
+                y2 = (float)(-cosVal * length2);
+                canvas.drawLine(cx + x1, cy + y1, cx + x2,
+                        cy + y2, mTickPaint);
             }
 
 

@@ -3,5 +3,5 @@
     <color name="background">#000000</color>
     <color name="background2">#000088</color>
     <color name="analog_hands">#B7995A</color>
-    <color name="analog_hands_ambient">#ffffff</color>
+    <color name="analog_hands_ambient">#D1CBCA</color>
 </resources>
