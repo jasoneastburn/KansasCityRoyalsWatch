@@ -86,6 +86,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
         Paint mHandPaint;
+        Paint mHandPaintAmbient;
         Bitmap mBackgroundBitmap;
         Bitmap mBackgroundBitmapAmbient;
         boolean mAmbient;
@@ -132,6 +133,12 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             mHandPaint.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
             mHandPaint.setAntiAlias(true);
             mHandPaint.setStrokeCap(Paint.Cap.ROUND);
+
+            mHandPaintAmbient = new Paint();
+            mHandPaintAmbient.setColor(resources.getColor(R.color.analog_hands_ambient));
+            mHandPaintAmbient.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
+            mHandPaintAmbient.setAntiAlias(true);
+            mHandPaintAmbient.setStrokeCap(Paint.Cap.ROUND);
 
             mTime = new Time();
         }
@@ -242,11 +249,11 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
 
             float minX = (float) Math.sin(minRot) * minLength;
             float minY = (float) -Math.cos(minRot) * minLength;
-            canvas.drawLine(centerX, centerY, centerX + minX, centerY + minY, mHandPaint);
+            canvas.drawLine(centerX, centerY, centerX + minX, centerY + minY, mHandPaintAmbient);
 
             float hrX = (float) Math.sin(hrRot) * hrLength;
             float hrY = (float) -Math.cos(hrRot) * hrLength;
-            canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHandPaint);
+            canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHandPaintAmbient);
         }
 
         @Override
