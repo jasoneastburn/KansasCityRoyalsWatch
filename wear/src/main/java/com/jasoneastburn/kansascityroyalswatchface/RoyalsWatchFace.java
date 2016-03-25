@@ -241,9 +241,8 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
 
-            // Find the center. Ignore the window insets so that, on round watches with a
-            // "chin", the watch face is centered on the entire screen, not just the usable
-            // portion.
+            // Draw the background.
+            canvas.drawBitmap(mBackgroundBitmap, 0, 0, mBackgroundPaint);
             float centerX = bounds.width() / 2f;
             float centerY = bounds.height() / 2f;
 
@@ -262,7 +261,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
                 //canvas.drawColor(Color.BLACK);
                 canvas.drawBitmap(mBackgroundBitmapAmbient, 0, 0, null);
             } else {
-               // canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
+                // canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
                 canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
             }
 
@@ -289,47 +288,43 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
                         cy + y2, mTickPaint);
             }
 
-            float secRot = mTime.second / 30f * (float) Math.PI;
-            int minutes = mTime.minute;
-            float minRot = minutes / 30f * (float) Math.PI;
-            float hrRot = ((mTime.hour + (minutes / 60f)) / 6f) * (float) Math.PI;
-
             float secLength = centerX - 20;
             float minLength = centerX - 40;
             float hrLength = centerX - 80;
 
+            /*
+             * These calculations reflect the rotation in degrees per unit of
+             * time, e.g. 360 / 60 = 6 and 360 / 12 = 30
+             */
+            final float secondsRotation = mTime.second * 6f;
+            final float minutesRotation = mTime.minute * 6f;
+            // account for the offset of the hour hand due to minutes of the hour.
+            final float hourHandOffset = mTime.minute / 2f;
+            final float hoursRotation = (mTime.hour * 30) + hourHandOffset;
+
+            // save the canvas state before we begin to rotate it
             canvas.save();
 
-            if (!mAmbient) {
-                float secX = (float) Math.sin(secRot) * secLength;
-                float secY = (float) -Math.cos(secRot) * secLength;
-                canvas.drawLine(centerX, centerY, centerX + secX, centerY + secY, mSecondPaint);
-            }
+            canvas.rotate(hoursRotation, centerX, centerY);
+            canvas.drawRoundRect(centerX - HAND_END_CAP_RADIUS, centerY - hrLength,
+                    centerX + HAND_END_CAP_RADIUS, centerY + HAND_END_CAP_RADIUS,
+                    HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS, mHourPaint);
 
-            float hrX = (float) Math.sin(hrRot) * hrLength;
-            float hrY = (float) -Math.cos(hrRot) * hrLength;
+            canvas.rotate(minutesRotation - hoursRotation, centerX, centerY);
+            canvas.drawRoundRect(centerX - HAND_END_CAP_RADIUS, centerY - minLength,
+                    centerX + HAND_END_CAP_RADIUS, centerY + HAND_END_CAP_RADIUS,
+                    HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS, mMinutePaint);
 
 
-            canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHourPaint);
-//            canvas.drawRoundRect(centerX - HAND_END_CAP_RADIUS,
-//                    centerY - hrLength, centerX + HAND_END_CAP_RADIUS,
-//                   centerY + HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS,
-//                    HAND_END_CAP_RADIUS, mHourPaint);
-
-            float minX = (float) Math.sin(minRot) * minLength;
-            float minY = (float) -Math.cos(minRot) * minLength;
-
-            canvas.drawLine(centerX, centerY, centerX + minX, centerY + minY, mMinutePaint);
-//            canvas.drawRoundRect(centerX - HAND_END_CAP_RADIUS,
-//                   centerY - minLength, centerX + HAND_END_CAP_RADIUS,
-//                    centerY + HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS,
-//                    HAND_END_CAP_RADIUS, mMinutePaint);
+            canvas.rotate(secondsRotation - minutesRotation, centerX, centerY);
+            canvas.drawLine(centerX, centerY - HAND_END_CAP_RADIUS, centerX,
+                    centerY - secLength, mHandPaint);
+            canvas.drawCircle(centerX, centerY, HAND_END_CAP_RADIUS, mHandPaint);
+            // restore the canvas' original orientation.
+            canvas.restore();
 
             canvas.drawCircle(centerX, centerY, HAND_END_CAP_RADIUS,
                     mHourPaint);
-
-
-
         }
 
         @Override
