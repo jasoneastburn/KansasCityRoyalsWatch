@@ -87,6 +87,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         Paint mBackgroundPaint;
         Paint mHandPaint;
         Bitmap mBackgroundBitmap;
+        Bitmap mBackgroundBitmapAmbient;
         boolean mAmbient;
         Time mTime;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -119,6 +120,9 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
 
             Drawable backgroundDrawable = resources.getDrawable(R.drawable.kcroyals, null);
             mBackgroundBitmap = ((BitmapDrawable) backgroundDrawable).getBitmap();
+
+            Drawable backgroundDrawableAmbient = resources.getDrawable(R.drawable.kcroyalsbw, null);
+            mBackgroundBitmapAmbient = ((BitmapDrawable) backgroundDrawableAmbient).getBitmap();
 
             //mBackgroundPaint = new Paint();
             //mBackgroundPaint.setColor(resources.getColor(R.color.background));
@@ -194,20 +198,32 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
 
-            // Draw the background.
-            if (isInAmbientMode()) {
-                //canvas.drawColor(Color.BLACK);
-                canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
-            } else {
-               // canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
-                canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
-            }
 
             // Find the center. Ignore the window insets so that, on round watches with a
             // "chin", the watch face is centered on the entire screen, not just the usable
             // portion.
             float centerX = bounds.width() / 2f;
             float centerY = bounds.height() / 2f;
+
+            float mScale = ((float) bounds.width()) / (float) mBackgroundBitmap.getWidth();
+
+            mBackgroundBitmap = Bitmap.createScaledBitmap
+                    (mBackgroundBitmap, (int)(mBackgroundBitmap.getWidth() * mScale),
+                            (int)(mBackgroundBitmap.getHeight() * mScale), true);
+
+            mBackgroundBitmapAmbient = Bitmap.createScaledBitmap
+                    (mBackgroundBitmapAmbient, (int)(mBackgroundBitmapAmbient.getWidth() * mScale),
+                            (int)(mBackgroundBitmapAmbient.getHeight() * mScale), true);
+
+            // Draw the background.
+            if (isInAmbientMode()) {
+                //canvas.drawColor(Color.BLACK);
+                canvas.drawBitmap(mBackgroundBitmapAmbient, 0, 0, null);
+            } else {
+               // canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
+                canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
+            }
+
 
             float secRot = mTime.second / 30f * (float) Math.PI;
             int minutes = mTime.minute;
