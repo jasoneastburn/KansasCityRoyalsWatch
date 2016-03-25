@@ -31,9 +31,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.graphics.Palette;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.lang.ref.WeakReference;
@@ -56,7 +58,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
      */
     private static final int MSG_UPDATE_TIME = 0;
     private static final float HAND_END_CAP_RADIUS = 4.0f;
-    private static final float SHOW_RADIUS = 6.0f;
+    private static final float SHADOW_RADIUS = 6.0f;
 
     @Override
     public Engine onCreateEngine() {
@@ -96,6 +98,8 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         Bitmap mBackgroundBitmap;
         Bitmap mBackgroundBitmapAmbient;
         boolean mAmbient;
+        int mWatchHandColor = Color.WHITE;
+        int mWatchHandShadowColor = Color.BLACK;
         Time mTime;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
@@ -134,6 +138,20 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             //mBackgroundPaint = new Paint();
             //mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
+  /*          Palette.generateAsync(mBackgroundBitmap,
+                    new Palette.PaletteAsyncListener() {
+                        @Override
+                        public void onGenerated(Palette palette) {
+                            if (null != palette){
+                                Log.d("onGenerated", palette.toString());
+                                mWatchHandColor = palette.getVibrantColor(Color.WHITE);
+                                mWatchHandShadowColor =
+                                        palette.getDarkMutedColor(Color.BLACK);
+                                setWatchHandColor();
+                            }
+                        }
+                    });
+*/
             mHandPaint = new Paint();
             mHandPaint.setColor(resources.getColor(R.color.analog_hands));
             mHandPaint.setStrokeWidth(resources.getDimension(R.dimen.analog_hand_stroke));
@@ -176,6 +194,17 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             mTime = new Time();
         }
 
+        private void setWatchHandColor(){
+            if (mAmbient){
+                mHandPaint.setColor(Color.WHITE);
+                mHandPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+            } else {
+                mHandPaint.setColor(mWatchHandColor);
+                mHandPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, mWatchHandShadowColor);
+            }
+        }
+
+
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
@@ -205,6 +234,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
                     mMinutePaint.setAntiAlias(!inAmbientMode);
                     mHourPaint.setAntiAlias(!inAmbientMode);
                 }
+                //setWatchHandColor();
                 invalidate();
             }
 
@@ -316,9 +346,12 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
                     HAND_END_CAP_RADIUS, HAND_END_CAP_RADIUS, mMinutePaint);
 
 
-            canvas.rotate(secondsRotation - minutesRotation, centerX, centerY);
-            canvas.drawLine(centerX, centerY - HAND_END_CAP_RADIUS, centerX,
-                    centerY - secLength, mHandPaint);
+            if (!mAmbient) {
+
+                canvas.rotate(secondsRotation - minutesRotation, centerX, centerY);
+                canvas.drawLine(centerX, centerY - HAND_END_CAP_RADIUS, centerX,
+                        centerY - secLength, mHandPaint);
+            }
             canvas.drawCircle(centerX, centerY, HAND_END_CAP_RADIUS, mHandPaint);
             // restore the canvas' original orientation.
             canvas.restore();
