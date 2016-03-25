@@ -21,10 +21,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -83,6 +86,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
         Paint mHandPaint;
+        Bitmap mBackgroundBitmap;
         boolean mAmbient;
         Time mTime;
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -113,8 +117,11 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
 
             Resources resources = RoyalsWatchFace.this.getResources();
 
-            mBackgroundPaint = new Paint();
-            mBackgroundPaint.setColor(resources.getColor(R.color.background));
+            Drawable backgroundDrawable = resources.getDrawable(R.drawable.kcroyals, null);
+            mBackgroundBitmap = ((BitmapDrawable) backgroundDrawable).getBitmap();
+
+            //mBackgroundPaint = new Paint();
+            //mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
             mHandPaint = new Paint();
             mHandPaint.setColor(resources.getColor(R.color.analog_hands));
@@ -189,9 +196,11 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
 
             // Draw the background.
             if (isInAmbientMode()) {
-                canvas.drawColor(Color.BLACK);
+                //canvas.drawColor(Color.BLACK);
+                canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
             } else {
-                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
+               // canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), mBackgroundPaint);
+                canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
             }
 
             // Find the center. Ignore the window insets so that, on round watches with a
