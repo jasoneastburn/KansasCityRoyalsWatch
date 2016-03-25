@@ -177,10 +177,10 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             updateTimer();
         }
 
-        /**
+       /**
          * Captures tap event (and tap type) and toggles the background color if the user finishes
          * a tap.
-         */
+
         @Override
         public void onTapCommand(int tapType, int x, int y, long eventTime) {
             Resources resources = RoyalsWatchFace.this.getResources();
@@ -200,7 +200,7 @@ public class RoyalsWatchFace extends CanvasWatchFaceService {
             }
             invalidate();
         }
-
+**/
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
